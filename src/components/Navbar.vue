@@ -8,7 +8,7 @@
         </svg>
       </button>
       <ul :class="{ 'hidden': !menuOpen, 'flex': menuOpen }"
-        class="absolute top-14 left-0 w-full bg-blue-600 md:bg-transparent md:static md:flex md:space-x-6 md:w-auto md:items-center">
+        class="absolute top-14 left-0 w-full bg-white md:bg-transparent md:static md:flex md:space-x-6 md:w-auto md:items-center">
         <li>
           <RouterLink to="/quienessomo" class="block px-4 py-2" :style="{ color: '#AB9385' }">Quienes
             Somos</RouterLink>
@@ -36,6 +36,7 @@ import router from "@/router";
 import axios from "axios";
 import { ref } from "vue";
 import { RouterLink } from 'vue-router';
+import { useAuthStore } from "@/stores/AuthStore";
 
 const menuOpen = ref(false);
 
@@ -43,23 +44,26 @@ const toggleMenu = () => {
   menuOpen.value = !menuOpen.value;
 };
 
+const authStore = useAuthStore()
+
 const logout = async () => {
   try {
-    const token = localStorage.getItem('token');
+    // const token = localStorage.getItem('token');
 
-    if (!token) {
-      router.push('/login');
-      return;
-    }
+    // if (!token) {
+    //   router.push('/login');
+    //   return;
+    // }
 
-    const response = await axios.post('https://localhost:7004/api/User/logout', {}, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+    // const response = await axios.post('https://localhost:7004/api/User/logout', {}, {
+    //   headers: {
+    //     Authorization: `Bearer ${token}`
+    //   }
+    // });
 
-    localStorage.removeItem('token');
-    router.push('/login');
+    // localStorage.removeItem('token');
+    // router.push('/login');
+    await authStore.logout()
   } catch (error) {
     console.error('Error al cerrar sesión:', error.response?.data || error.message);
   }

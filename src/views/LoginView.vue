@@ -1,21 +1,24 @@
 <template>
+    <Loading v-if="loadingStore.isLoading" class="absolute z-10"/>
     <header class="relative w-full h-237 bg-cover bg-center opacity-90" :style="{ backgroundImage: `url(${Barber})` }">
         <div class="flex items-center justify-center min-h-screen">
-            <div class="bg-white p-8 rounded shadow-md w-[40rem] h-[32rem]">
-                <h2 class="text-4xl font-bold mb-6 text-center">Iniciar Sesión</h2>
-                <h1 class="text-6xl font-bold font-serif mb-6 text-center">BARBER SHOP</h1>
+            <div class="bg-white p-8 rounded shadow-md w-[40rem] h-[30rem]">
+                <h2 class="text-4xl font-bold mb-6 text-center text-black">Iniciar Sesión</h2>
+                <h1 class="text-6xl font-bold font-serif mb-8 text-center text-black">BARBER SHOP</h1>
                 <form @submit.prevent="login">
                     <div class="mb-8">
-                        <label class="block text-black mb-2" for="name">Usuario</label>
-                        <input v-model="name" type="name" id="name"
-                            class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
-                            required placeholder="Usuario" />
+                        <FloatLabel>
+                            <InputText v-model="email" type="email" id="email"
+                                class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
+                                required placeholder="Correo" />
+                            <label class="block text-black mb-2" for="email">Correo</label>
+                        </FloatLabel>
                     </div>
                     <div class="mb-10">
-                        <label class="block text-black mb-2" for="password">Contraseña</label>
-                        <input v-model="password" type="password" id="password"
-                            class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
-                            required placeholder="Contraseña" />
+                        <FloatLabel>
+                            <Password v-model="password" type="password" id="password" :feedback="false" toggleMask/>
+                            <label class="block text-black mb-2">Contraseña</label>
+                    </FloatLabel>
                     </div>
 
                     <div class="mb-5 flex items-center justify-center">
@@ -26,9 +29,8 @@
                     </div>
                     <!-- <RouterLink to="/home" class="pl-3 font-black text-[#AB9385] underline">Entrar a home</RouterLink> -->
                     <button type="submit"
-                        class="w-full bg-[#AB9385] text-white py-3 rounded hover:bg-[#85736a] transition duration-200"
-                        :disabled="loading">
-                        {{ loading ? 'Cargando...' : 'Iniciar Sessión' }}
+                        class="w-full bg-[#AB9385] text-white py-3 rounded hover:bg-[#85736a] transition duration-200">
+                        Iniciar Sessión
                     </button>
                 </form>
             </div>
@@ -42,60 +44,30 @@ import { RouterLink, useRouter } from "vue-router";
 import { ref } from "vue";
 import axios from 'axios';
 import Swal from "sweetalert2";
+import { useAuthStore } from "@/stores/AuthStore"
+import { useLoadingStore } from "@/stores/loadingStore";
+import FloatLabel from 'primevue/floatlabel';
+import InputText from 'primevue/inputtext';
+import Password from 'primevue/password';
+import Loading from "@/components/common/Loading.vue";
 
-const name = ref('');
+const email = ref('');
 const password = ref('');
 const error = ref('');
-const loading = ref(false);
-const router = useRouter();
+// const router = useRouter();
+const authStore = useAuthStore()
+const loadingStore = useLoadingStore()
 
 const login = async () => {
 
-    loading.value = true;
+    loadingStore.startLoading()
 
     try {
-        const response = await axios.post('https://localhost:7004/api/User/login', {
-            name: name.value,
-            password: password.value
-        });
-
-        const { token, usertype, name: userName, userId } = response.data;
-
-        if (!token || !usertype || !userId) {
-            throw new Error("Datos incompletos del servidor")
-        }
-
-        localStorage.setItem('token', token);
-        localStorage.setItem('usertype', usertype.trim().toLowerCase());
-        localStorage.setItem('name', userName);
-        localStorage.setItem('userId', userId.toString());
-
-        setTimeout(() => {
-            Swal.fire({
-                icon: 'success',
-                title: 'Inicio de sesión exitosa',
-                timer: 1500,
-                showConfirmButton: false
-            });
-
-            setTimeout(() => {
-                if (usertype === 'admin') {
-                    router.push('/admin-dashboard');
-                } else if (usertype === 'user') {
-                    router.push('/home');
-                }
-            }, 1500);
-        }, 0);
-
-    } catch (err) {
-        console.error('Error', err);
-        Swal.fire({
-            icon: 'error',
-            title: "Credenciales Incorrectas",
-            text: "El nombre del Usuario o Contraseña es incorrecto. Por favor, inténtalo de nuevo."
-        })
+        await authStore.login(email.value, password.value);
+    } catch (error) {
+        console.error('Error during login', error);
     } finally {
-        loading.value = false;
+        loadingStore.stopLoading()
     }
 };
 </script>

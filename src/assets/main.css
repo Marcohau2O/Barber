@@ -1,1 +1,80 @@
 @import "tailwindcss";
+@import 'primeicons/primeicons.css';
+
+.p-inputtext {
+    color: black !important;
+    background-color: white !important;
+    border-color: black !important;
+    width: 36rem;
+    height: 3.5rem;
+}
+.p-floatlabel label {
+    color: black !important;
+}
+
+.p-password-mask-icon, .p-password-unmask-icon {
+    color: black !important;
+    width: 2.1rem !important;
+    height: 1.8rem !important;
+    right: 1rem !important;
+    top: 42% !important;
+}
+
+.p-dialog {
+    color:rgb(0, 0, 0) !important;
+    background-color: white !important;
+}
+
+#edit-profile-button {
+    color: white !important;
+    background-color: #AB9385 !important;
+    border: #AB9385 !important;
+    height:  2.6rem;
+    width: 8rem;
+    margin-top: 1rem;
+}
+
+#buttonCancel {
+    color: white;
+    background-color: rgb(224, 25, 25);
+    border: rgb(224, 25, 25);
+    height: 2.7rem;
+}
+
+#buttonSave {
+    color: white;
+    background-color: green;
+    border: green;
+    height: 2.7rem;
+}
+
+.p-card {
+    background-color: white !important;
+}
+
+.p-card-header, .p-card-title, .p-card-content {
+    color: black !important;
+    font-size: medium !important;
+}
+
+.p-select, .p-select-list-container, .p-select-dropdown-icon {
+    background-color: white !important;
+    border: black;
+}
+
+.p-select-option, .p-select-label {
+    background-color: white !important; /* azul como ejemplo */
+    color: black !important;
+}
+
+/* Hover en opción seleccionada */
+.p-select-option:hover {
+    background-color: #2563EB !important; /* más oscuro al hacer hover */
+    color: white !important;
+}
+
+/* Hover en opciones NO seleccionadas */
+.p-select-option:not(.p-highlight):hover {
+    background-color: black !important; /* gris claro */
+    color: white !important;
+}

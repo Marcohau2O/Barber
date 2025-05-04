@@ -14,14 +14,14 @@
           <div class="text-center md:text-left">
             <h3 class="text-lg font-semibold text-[#AB9385]">Síguenos</h3>
             <div class="flex gap-4 mt-2 justify-center md:justify-start">
-              <a href="#" class="hover:text-white transition">
-                <i class="fab fa-facebook text-2xl"></i>
+              <a href="#" class="hover:text-[#AB9385] transition">
+                <i class="pi pi-facebook" style="font-size: 2rem"></i>
               </a>
               <a href="#" class="hover:text-[#AB9385] transition">
-                <i class="fab fa-instagram text-2xl"></i>
+                <i class="pi pi-instagram" style="font-size: 2rem"></i>
               </a>
               <a href="#" class="hover:text-[#AB9385] transition">
-                <i class="fab fa-twitter text-2xl"></i>
+                <i class="pi pi-twitter" style="font-size: 2rem"></i>
               </a>
             </div>
           </div>

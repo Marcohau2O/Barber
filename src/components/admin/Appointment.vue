@@ -2,101 +2,106 @@
     <div class="flex flex-col items-center justify-center m-10">
       <h1 class="text-4xl font-bold mb-8">Gestión de Citas</h1>
   
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
       <!-- Lista de Citas -->
-      <div class="w-full max-w-7xl">
-        <div v-for="appointment in appointments" :key="appointment.id" class="bg-gray-50 p-4 mb-4 rounded-lg shadow-lg">
-          <div class="flex flex-col">
-            <p class="text-lg text-gray-600">Cliente: {{ appointment.name }}</p>
-            <p class="text-lg text-gray-600">Fecha: {{ appointment.date }}</p>
-            <p class="text-lg text-gray-600">Hora: {{ appointment.time }}</p>
-            <p class="text-lg text-gray-600">Estado: 
-              <span :class="getStatusColor(appointment.confirmedStatus)">
-                {{ appointment.confirmedStatus }}
-              </span>
-            </p>
-  
-            <!-- Selector de Estado -->
-            <div class="mt-4">
-              <select 
-                v-model="appointment.status" 
-                class="p-2 border border-gray-500 rounded-md"
-              >
-                <option value="Pendiente">Pendiente</option>
-                <option value="Aceptado">Aceptado</option>
-                <option value="Rechazado">Rechazado</option>
-              </select>
-            </div>
-  
-            <!-- Botón para confirmar el cambio de estado -->
-            <button
-              @click="updateStatus(appointment)"
-              class="mt-2 bg-[#AB9385] text-white p-2 rounded-md disabled:bg-gray-400"
-              :disabled="appointment.confirmedStatus === 'Aceptado' || appointment.confirmedStatus === 'Rechazado'"
-            >
-              Confirmar Estado
-            </button>
+      <Card v-for="appointment in formattedAppointments" :key="appointment.id" style="width: 20rem; overflow: hidden;">
+        <template #header>
+          <p class="m-2">{{ appointment.id}}</p>
+        </template>
+        <template #title>{{ appointment.name }}</template>
+        <template #content>
+          <p class="m-0">
+            {{ appointment.date }}
+          </p>
+          <p class="m-1">
+            {{ appointment.phone }}
+          </p>
+          <p class="m-0">
+            {{ appointment.time }}
+            <span :class="getStatusColor(appointment.status)">
+              — {{ appointment.status }}
+            </span>
+          </p>
+        </template>
+        <template #footer>
+          <div class="flex gap-4 mt-4">
+            <Select v-model="appointment.status" :options="status" optionLabel="status" placeholder="Select a status" class="w-full md:w-56"/>
+            <Button id="buttonSave" type="button" label="Save" class="w-full" @click="guardarEstado(appointment)" :disabled="appointment.status === 'Rechazado' || appointment.status === 'Confirmada'" />
           </div>
-        </div>
+        </template>
+      </Card>
       </div>
     </div>
   </template>
   
   <script setup lang="ts">
-  import { ref, onMounted } from 'vue';
+  import { ref, onMounted, computed } from 'vue';
   import axios from 'axios';
   import Swal from 'sweetalert2';
+  import  Card  from 'primevue/card';
+  import { Button } from 'primevue';
+  import Select from 'primevue/select';
+  import { useAdministradorStore } from '@/stores/AdministradorStore';
   
-  const appointments = ref([]);
-  
-  const updateStatus = async (appointment) => {
-    try {
-      await axios.put(`https://localhost:7004/api/Appointment/updateStatus/${appointment.id}`, {
-        status: appointment.status,
-      });
-  
-      appointment.confirmedStatus = appointment.status; // Actualiza el estado confirmado
-  
-      Swal.fire({
-        icon: 'success',
-        title: 'Estado actualizado',
-        text: 'El estado de la cita ha sido actualizado correctamente',
-        timer: 2000,
-        showConfirmButton: false,
-      });
-  
-    } catch (error) {
-      console.error('Error al actualizar estado:', error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Hubo un problema al actualizar el estado',
-      });
-    }
-  };
-  
-  const fetchAppointments = async () => {
-    try {
-      const response = await axios.get('https://localhost:7004/api/Appointment/All');
-      appointments.value = response.data.map((appointment) => ({
-        ...appointment,
-        confirmedStatus: appointment.status, // Mantiene el estado inicial confirmado
-      }));
-    } catch (error) {
-      console.error('Error al cargar citas:', error);
-    }
-  };
+  const AdminStore = useAdministradorStore()
+
+  // const fetchAppointments = async () => {
+  //   try {
+  //     const response = await axios.get('https://localhost:7004/api/Appointment/All');
+  //     appointments.value = response.data.map((appointment) => ({
+  //       ...appointment,
+  //       confirmedStatus: appointment.status, // Mantiene el estado inicial confirmado
+  //     }));
+  //   } catch (error) {
+  //     console.error('Error al cargar citas:', error);
+  //   }
+  // };
   
   const getStatusColor = (status) => {
     switch (status) {
       case 'Pendiente': return 'text-yellow-600';
-      case 'Aceptado': return 'text-green-600';
+      case 'Confirmada': return 'text-green-600';
       case 'Rechazado': return 'text-red-600';
       default: return 'text-gray-600';
     }
   };
+
+  const status = ref([
+    { status: 'Pendiente' },
+    { status: 'Confirmada' },
+    { status: 'Rechazado' },
+  ])
+
+  const formattedAppointments = computed(() => {
+    return AdminStore.appointments.map(appointment => ({
+        ...appointment,
+        selectStatus: appointment.status // Inicializa el select con el estado actual de la cita
+    }));
+});
   
-  onMounted(() => {
-    fetchAppointments();
+  const guardarEstado = async (appointment: any) => {
+    console.log("Antes de enviar:", { id: appointment.id, status: appointment.status });
+    try {
+      await  AdminStore.updateAppointmentStatus(appointment.id, appointment.status.status)
+      Swal.fire({
+        icon: 'success',
+        title: 'Estado actualizado',
+        text: `El estado de la cita con ID ${appointment.id} ha sido actualizado a ${appointment.status.status}`,
+        timer: 2000,
+        showConfirmButton: false,
+      })
+    } catch (error) {
+      console.error("Error al actualizar estado:", error);
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Hubo un problema al actualizar el estado.",
+        });
+    }
+  }
+
+  onMounted(async() => {
+    await AdminStore.getAllAppointment()
   });
   </script>
   

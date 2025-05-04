@@ -1,19 +1,20 @@
 <template>
+    <Loading v-if="loadingStore.isLoading" class="absolute z-10"/>
     <header class="relative w-full h-237 bg-cover bg-center opacity-90" :style="{ backgroundImage: `url(${Barber})` }">
         <div class="flex items-center justify-center min-h-screen">
-            <div class="bg-white p-6 rounded shadow-md w-[40rem] h-[28rem]">
-                <h2 class="text-4xl font-bold mb-6 text-center">Cambio de Contraseña</h2>
-                <h1 class="text-6xl font-bold font-serif mb-6 text-center">BARBER SHOP</h1>
+            <div class="bg-white p-6 rounded shadow-md w-[40rem] h-[33rem]">
+                <h2 class="text-4xl font-bold mb-6 text-center text-black">Cambio de Contraseña</h2>
+                <h1 class="text-6xl font-bold font-serif mb-6 text-center text-black">BARBER SHOP</h1>
                 <form @submit.prevent="resetPassword">
                     <div class="mb-8">
-                        <label class="block text-black mb-2" for="password">Nueva Contraseña:</label>
-                        <input v-model="password" type="password" id="password"
+                        <label class="block text-black mb-2">Nueva Contraseña:</label>
+                        <Password v-model="password" :feedback="false" toggleMask
                             class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
                             required placeholder="Nueva Contraseña:" />
                     </div>
                     <div class="mb-8">
-                        <label class="block text-black mb-2" for="confirmPassword">Confirmar Nueva Contraseña:</label>
-                        <input v-model="confirmPassword" type="password" id="confirmPassword"
+                        <label class="block text-black mb-2">Confirmar Nueva Contraseña:</label>
+                        <Password v-model="confirmPassword" :feedback="false" toggleMask
                             class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
                             required placeholder="Confirmar Nueva Contraseña:" />
                     </div>
@@ -33,12 +34,18 @@ import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { Password } from "primevue";
+import Loading from "@/components/common/Loading.vue";
+import { useLoadingStore } from "@/stores/loadingStore";
+import { useAuthStore } from "@/stores/AuthStore";
 
 const password = ref('');
 const confirmPassword = ref('');
 const route = useRoute();
 const router = useRouter();
 const loading = ref(false)
+const loadingStore = useLoadingStore()
+const authStore = useAuthStore()
 
 const resetPassword = async () => {
     if (password.value !== confirmPassword.value) {
@@ -46,13 +53,11 @@ const resetPassword = async () => {
         return;
     }
 
-    loading.value = true;
+    const token = route.params.token
+
+    loadingStore.startLoading()
     try {
-        await axios.post('https://localhost:7004/api/User/reset-password', {
-            token: route.params.token,
-            newPassword: password.value,
-            newConfirmPassword: confirmPassword.value
-        });
+        await authStore.ResetPassword(password.value, confirmPassword.value, token)
 
         setTimeout(() => {
             Swal.fire({
@@ -71,7 +76,7 @@ const resetPassword = async () => {
     } catch (err) {
         Swal.fire('Error', 'Hubo un problema al cambiar la contraseña.', 'error');
     } finally {
-        loading.value = false
+        loadingStore.stopLoading()
     }
 };
 </script>

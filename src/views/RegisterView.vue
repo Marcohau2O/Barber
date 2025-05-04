@@ -1,33 +1,36 @@
 <template>
+    <Loading v-if="loadingStore.isLoading" class="absolute z-10"/>
     <header class="relative w-full h-237 bg-cover bg-center opacity-90" :style="{ backgroundImage: `url(${Barber})` }">
         <div class="flex items-center justify-center min-h-screen">
             <div class="bg-white p-6 rounded shadow-md w-[40rem] h-[39rem]">
-                <h2 class="text-4xl font-bold mb-6 text-center">Registro</h2>
-                <h1 class="text-6xl font-bold font-serif mb-6 text-center">BARBER SHOP</h1>
+                <h2 class="text-4xl font-bold mb-6 text-center text-black">Registro</h2>
+                <h1 class="text-6xl font-bold font-serif mb-6 text-center text-black">BARBER SHOP</h1>
                 <form @submit.prevent="register">
-                    <div class="mb-1">
-                        <label class="block text-black mb-2" for="name">Nombre Usuario</label>
-                        <input type="name" id="name" v-model="name"
-                            class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
-                            required placeholder="UserName" />
+                    <div class="mb-8">
+                        <FloatLabel>
+                            <InputText type="name" id="name" v-model="name"
+                            class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"/>
+                            <label class="block text-black mb-2" for="name">Nombre Usuario</label>
+                        </FloatLabel>
                     </div>
-                    <div class="mb-2">
-                        <label class="block text-black mb-2" for="email">Correo Electronico</label>
-                        <input type="email" id="email" v-model="email"
-                            class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
-                            required placeholder="Example@ppp.com" />
+                    <div class="mb-8">
+                        <FloatLabel>
+                        <InputText type="email" id="email" v-model="email"
+                            class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"/>
+                            <label class="block text-black mb-2" for="email">Correo Electronico</label>
+                        </FloatLabel>
                     </div>
-                    <div class="mb-3">
-                        <label class="block text-black mb-2" for="password">Contraseña</label>
-                        <input type="password" id="password" v-model="password"
-                            class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
-                            required placeholder="********" />
+                    <div class="mb-8">
+                        <FloatLabel>
+                        <Password type="password" id="password" v-model="password" :feedback="false" toggleMask/>
+                            <label class="block text-black mb-2">Contraseña</label>
+                        </FloatLabel>
                     </div>
                     <div class="mb-4">
-                        <label class="block text-black mb-2" for="ConfirmPassword">Confirma Contraseña</label>
-                        <input type="password" id="ConfirmPassword" v-model="confirmPassword"
-                            class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
-                            required placeholder="********" />
+                        <FloatLabel>
+                        <Password type="password" id="ConfirmPassword" v-model="confirmPassword" :feedback="false" toggleMask/>
+                            <label class="block text-black mb-2">Confirma Contraseña</label>
+                        </FloatLabel>
                     </div>
 
                     <div class="mb-5 flex items-center justify-center">
@@ -55,16 +58,23 @@ import { ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import Swal from "sweetalert2";
-
+import FloatLabel from 'primevue/floatlabel';
+import InputText from 'primevue/inputtext';
+import Password from 'primevue/password';
+import { useAuthStore } from "@/stores/AuthStore"
+import { useLoadingStore } from "@/stores/loadingStore";
+import Loading from "@/components/common/Loading.vue";
 
 const name = ref('');
 const email = ref('');
 const password = ref('');
 const confirmPassword = ref('');
-const usertype = ref('user')
+//const usertype = ref('user')
 const error = ref('');
 const loading = ref(false);
 const router = useRouter();
+const authStore = useAuthStore()
+const loadingStore = useLoadingStore()
 
 const register = async () => {
     // Validación de contraseñas
@@ -78,53 +88,43 @@ const register = async () => {
         return;
     }
 
-    loading.value = true;
+    loadingStore.startLoading()
+
     try {
-        const response = await axios.post('https://localhost:7004/api/User/register', {
-            name: name.value,
-            email: email.value,
-            usertype: usertype.value,
-            password: password.value,
-            confirmPassword: confirmPassword.value
-        });
-
-        setTimeout(() => {
-            Swal.fire({
-                icon: 'success',
-                title: 'Registro exitoso',
-                timer: 1500,
-                showConfirmButton: false
-            });
-
-            setTimeout(() => {
-                router.push('/home');
-            }, 1500);
-        }, 0);
+        await authStore.register(
+            name.value,
+            email.value,
+            //usertype: usertype.value,
+            password.value,
+            confirmPassword.value
+        )
         // console.log('Respuesta de la api:' + response);
+        router.push('/login')
     } catch (err) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Ocurrió un error',
-            text: 'No se pudo completar el registro. Inténtalo de nuevo.'
-        });
+        console.error('Error during register', err)
     } finally {
-        loading.value = false;
+        loadingStore.stopLoading()
     }
 };
 </script>
 
-<style scoped>
+<!-- <style scoped>
 .loader {
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #AB9385;
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  animation: spin 1s linear infinite;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #AB9385;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
-</style>
+</style> -->

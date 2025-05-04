@@ -23,16 +23,16 @@ import axios from 'axios';
 
 const totalAppointments = ref(0);
 
-const fetchAppointmentCount = async () => {
-  try {
-    const response = await axios.get('https://localhost:7004/api/Appointment/count');
-    totalAppointments.value = response.data.totalAppointments;
-  } catch (error) {
-    console.error('Error al obtener el total de citas:', error);
-  }
-};
+// const fetchAppointmentCount = async () => {
+//   try {
+//     const response = await axios.get('https://localhost:7004/api/Appointment/count');
+//     totalAppointments.value = response.data.totalAppointments;
+//   } catch (error) {
+//     console.error('Error al obtener el total de citas:', error);
+//   }
+// };
 
-onMounted(() => {
-  fetchAppointmentCount();
-});
+// onMounted(() => {
+//   fetchAppointmentCount();
+// });
 </script>
