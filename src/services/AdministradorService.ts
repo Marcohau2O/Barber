@@ -57,3 +57,11 @@ const handleError = async (error: any, context: string) => {
       await handleError(error, 'updateStatusService')
     }
   }
+
+  export const deleteUserService = async (id: number) => {
+    try {
+      const response = await genericRequestAutheticated(`${base_url}/administradores/deleteUser/${id}`, 'DELETE', {id})
+    } catch (error: any) {
+      await handleError(error, 'updateStatusService')
+    }
+  }

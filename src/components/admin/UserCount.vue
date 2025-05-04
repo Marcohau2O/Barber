@@ -89,7 +89,7 @@
                             <i class="pi pi-file-edit" style="font-size: 1.4rem"></i>
                         </button>
                         
-                        <button @click="deleteUser(user.id)" class="bg-red-500 p-2 m-2 rounded-lg text-white">
+                        <button @click="deleteUser(user)" class="bg-red-500 p-2 m-2 rounded-lg text-white">
                             <i class="pi pi-trash"></i>
                         </button>
                     </th>   
@@ -218,44 +218,33 @@ const updateUser = async () => {
     }
 };
 
-// const deleteUser = async (id: number) => {
-//     try {
-//         const token = localStorage.getItem('token');
-//         console.log('Token enviado:', token);
+const deleteUser = async (user: any) => {
+    try {
+        const result = await Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'No podrás revertir esta acción!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, eliminarlo!',
+        });
 
-//         if (!token) {
-//             Swal.fire('Error', 'No hay token de autenticación', 'error');
-//             return;
-//         }
-
-//         const result = await Swal.fire({
-//             title: '¿Estás seguro?',
-//             text: 'No podrás revertir esta acción!',
-//             icon: 'warning',
-//             showCancelButton: true,
-//             confirmButtonColor: '#d33',
-//             cancelButtonColor: '#3085d6',
-//             confirmButtonText: 'Sí, eliminarlo!',
-//         });
-
-//         if (result.isConfirmed) {
-//             // Llamada a la API para eliminar al usuario
-//             await axios.delete(`https://localhost:7004/api/User/${id}`);
-//             Swal.fire({
-//                 icon: 'success',
-//                 title: 'Eliminado!',
-//                 text: 'El usuario ha sido eliminado correctamente.',
-//                 timer: 2400
-//             });
-
-//             // Refrescar la lista de usuarios
-//             fetchUsers();
-//         }
-//     } catch (error: any) {
-//         console.error('Error al eliminar usuario:', error);
-//         Swal.fire('Error', error.response?.data?.title || 'No se pudo eliminar el usuario', 'error');
-//     }
-// };
+        if (result.isConfirmed) {
+            // Llamada a la API para eliminar al usuario
+            await AdminStore.deleteUser(user.id);
+            Swal.fire({
+                icon: 'success',
+                title: 'Eliminado!',
+                text: 'El usuario ha sido eliminado correctamente.',
+                timer: 2400
+            });
+        }
+    } catch (error: any) {
+        console.error('Error al eliminar usuario:', error);
+        Swal.fire('Error', error.response?.data?.title || 'No se pudo eliminar el usuario', 'error');
+    }
+};
 
 onMounted(() => {
     AdminStore.getAllUsers();

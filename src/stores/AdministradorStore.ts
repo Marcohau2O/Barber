@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from 'vue'
-import { getAllAppointmentsService, getAllUsersService, updateStatusService, updateUserService } from "@/services/AdministradorService";
+import { deleteUserService, getAllAppointmentsService, getAllUsersService, updateStatusService, updateUserService } from "@/services/AdministradorService";
 
 export const useAdministradorStore = defineStore('AdminStore', () => {
     const users = ref([]);
@@ -20,6 +20,16 @@ export const useAdministradorStore = defineStore('AdminStore', () => {
         console.error("Error al obtener usuarios:", error);
     }
 }
+
+    async function deleteUser(id:number) {
+        try {
+            const response = await deleteUserService(id);
+            getAllUsers()
+            return response
+        } catch (error: any) {
+            console.error("Error al obtener usuarios:", error);
+        }
+    }
 
     async function getAllAppointment() {
         try {
@@ -54,5 +64,5 @@ export const useAdministradorStore = defineStore('AdminStore', () => {
         }
     }
 
-    return { users, totalCitas, citasPendientes, citasConfirmadas, appointments,getAllAppointment, getAllUsers, updateUser, updateAppointmentStatus }
+    return { users, totalCitas, citasPendientes, citasConfirmadas, appointments, getAllAppointment, getAllUsers, updateUser, updateAppointmentStatus, deleteUser }
 })
